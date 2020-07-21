@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: simple-golang-server
+  name: simple-golang-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-golang-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: simple-golang-server
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - image: aubm/simple-golang-server:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /health
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /health
+          name: simple-golang-server
+          resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: simple-golang-server
+  name: simple-golang-server
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: simple-golang-server
+  type: LoadBalancer
